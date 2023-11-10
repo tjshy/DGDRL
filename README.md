@@ -1,10 +1,10 @@
 # Dynamic Graph-based Deep Reinforcement Learning with Long and Short-term Relation Modeling for Portfolio Optimization (DGDRL)
 
 ##1. Dataset:
-   The 'data' directory contains the data for our three real-world datasets. The csv files contain historical feature data, 'relation.pkl' stores the raw graphs for short-term relations, and 'relation2.pkl' holds the final graphs for short-term relations after threshold filtering. The npy files store the graph for long-term relations.
+   The 'data' directory contains the data for our three real-world datasets. The csv files contain historical feature data, 'relation.pkl' stores the raw graphs for short-term relations, and 'relation2.pkl' holds the final graphs for short-term relations after threshold filtering. The npy files store the graph for long-term relations. It is important to note that training is conducted on a daily basis, with the division between training and testing set on a daily basis as well.
 
 ##2. Train:
-   Set the parameters in 'net.py', 'main.py' and 'stock\_env.py'. And run the 'main.sh' to train the model. The parameters are as follows:
+   Set the parameters in 'net.py', 'main.py', 'stock\_env.py' and 'agent.py'. And run the 'main.sh' to train the model. The parameters are as follows:
 
 ``` config
  num_stocks = 30             # the number of stocks
@@ -22,7 +22,11 @@
  max_step = 3404             # the end position of the entire set
  beg_idx = 3143(3163-20)     # the start position of the test set(The test set follows the training set, and the first 20 days are empty.)
  end_idx = 3404              # the end position of the test set
- gamma=0.99                  # profit rate after deducting stock transaction fees
+ gamma=0.99                  # gamma
+ batch_size = 128            # batchsize
+ learning_rate_cri = 0.08    # learning rate of the critic
+ learning_rate_act = 0.08    # learning rate of the agent
+ ratio_clip = 0.25           # clipping ratio
  ```
 
 
