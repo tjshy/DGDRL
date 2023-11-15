@@ -150,7 +150,6 @@ class Agent:
 
             value = torch.zeros(self.batch_size, device = self.device)
             for i in range(len(state)):
-                #TODO 加入图结构
                 value[i] = self.cri(state[i],dr[i]).squeeze(1)
             obj_critic = self.criterion(value, r_sum)
             self.optimizer_update(self.cri_optimizer, obj_critic)
