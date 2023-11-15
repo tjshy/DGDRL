@@ -31,7 +31,7 @@ class StockTradingEnv:
         self.daily_return = []
 
         self.window=20
-        self.shares_num = self.close_ary.shape[1]# 股票数
+        self.shares_num = self.close_ary.shape[1]# number of stocks
 
         # environment information
         self.env_name = 'StockTradingEnv-v2'
