@@ -1,35 +1,31 @@
 import torch
 import time
 import os
-from stock_env import build_env
 from stock_env import StockTradingEnv
 from replay_buffer import ReplayBufferList
 import matplotlib.pyplot as plt
 import numpy as np
+from config import Config,result_path
+
+
 def plot(name, amount):
     # 画图
     plt.figure(figsize=(15, 6))
     plt.rcParams["font.size"] = 18
-
     plt.grid(visible=True, which="major", linestyle="-")
     plt.grid(visible=True, which="minor", linestyle="--", alpha=0.5)
     plt.minorticks_on()
-
     plt.plot(range(len(amount)), amount, color="red", label="return", linewidth=2)
-
-    plt.title("train rewards")
+    plt.title("PPO train rewards")
     plt.xlabel("Date")
     plt.ylabel("return")
-
     plt.legend()
-    plt.savefig("DGDRL/result/" + name)
+    plt.savefig(result_path+"result/" + name)
     plt.close()
 
-def train_agent(args):
+def train_agent(args,env):
     torch.set_grad_enabled(False)
     args.init_before_training()
-    '''env-init'''
-    env = build_env(args.env_func, args.env_args)
 
     agent = args.agent(args.state_input_dim
                 , args.act_mid_layer_num
@@ -49,12 +45,10 @@ def train_agent(args):
     critic_loss=[]
     agent.states = [env.reset(), ]
     for i in range(args.epoch):
-        trajectory = agent.explore_env(env, target_step, (1-i/args.epoch))#(1-i/args.epoch)
-        #plot(f"epoch{i}_train_reward.png",env.everyday_asset)
+        trajectory = agent.explore_env(env, target_step, (1-i/args.epoch))
         agent.states[0]=env.reset()
         steps, r_exp = buffer.update_buffer((trajectory,))
 
-        # 开始训练
         torch.set_grad_enabled(True)
         logging_tuple = agent.update_net(buffer)
         torch.set_grad_enabled(False)
@@ -70,36 +64,28 @@ def train_agent(args):
         actor_loss.append(logging_tuple[1])
         critic_loss.append(logging_tuple[0])
         e_return = online_evaluate_agent(i, agent.act)
-        save_path = f"{cwd}/actor_epoch{i}_cumulationReturn{e_return:06.3f}.pth"
+        save_path = f"{cwd}/actor_epoch{i:03d}_cumulationReturn{e_return:06.3f}.pth"
         torch.save(agent.act.state_dict(), save_path)
-        
-
-   
 
     
 def online_evaluate_agent(epoch, actor):
-    gpu_id = 1
-    env_func = StockTradingEnv
-    env_args = {
-            'env_name': 'StockTradingEnv-v2',
-            'max_step': 3524,   # DOWS:3523 SSE50:3404    
-            'beg_idx': 3255,    # DOWS:3272(-20) SSE50:3163(-20) NAS:3275(-20)   
-            'end_idx': 3524,    # DOWS:3523 SSE50:3404    NAS:3524
-        }
+    
+    cfg=Config()
+    gpu_id = cfg.gpu_id
     device = torch.device(f"cuda:{gpu_id}" if (torch.cuda.is_available() and (gpu_id >= 0)) else "cpu")
-    env = build_env(env_func=env_func, env_args=env_args)
+    env=StockTradingEnv(cfg,mode='test')
     amount = []
     amount.append(env.initial_amount)
     max_step = env.max_step
     state = env.reset()
     Drelation = state[1]
     state = state[0]
-    episode_return = 0.0  # sum of rewards in an episode
+    episode_return = 0.0  
     for episode_step in range(max_step):
         s_tensor = torch.as_tensor(state, dtype=torch.float32, device=device)
         dr_tensor = torch.as_tensor(Drelation, dtype=torch.float32, device=device)
-        a_tensor = actor(s_tensor, dr_tensor)
-        action = a_tensor.detach().cpu().numpy()[0] 
+        a_tensor,_ = actor.get_action(s_tensor, dr_tensor)
+        action = a_tensor.detach().cpu().numpy()[0]
         state, reward, done, _ = env.step(action)     
         Drelation = state[1]
         state = state[0]
@@ -121,19 +107,30 @@ def evaluate_agent(env, actor):
     state = env.reset()
     Drelation = state[1]
     state = state[0]
+    actions = []
+    D_weights = []
+    S_weights = []
     for episode_step in range(max_step):
         s_tensor = torch.as_tensor(state, dtype=torch.float32, device=device)
         dr_tensor = torch.as_tensor(Drelation, dtype=torch.float32, device=device)
-        a_tensor = actor(s_tensor, dr_tensor)
-        action = a_tensor.detach().cpu().numpy()[0]  
+        a_tensor,_ = actor.get_action(s_tensor, dr_tensor)
+        action = a_tensor.detach().cpu().numpy()[0]
+        D_attn_weights, S_attn_weights=actor.get_attention_weight(s_tensor, dr_tensor)
+        D_attn_weights=D_attn_weights.detach().cpu().numpy()
+        S_attn_weights=S_attn_weights.detach().cpu().numpy()
         state, reward, done, _ = env.step(action)
-
+        actions.append(action)
+        D_weights.append(D_attn_weights)
+        S_weights.append(S_attn_weights)
         Drelation = state[1]
         state = state[0]
         if done:
             break
     episode_step += 1
-    # 每日资产总额列表 每日reward列表 每日日收益率
-    return env.cumulative_returns, env.everyday_asset, env.rewards, env.daily_return
+    actions_stacked = np.stack(actions)
+    D_weights_stacked = np.stack(D_weights)
+    S_weights_stacked = np.stack(S_weights)
+
+    return env.cumulative_returns, env.everyday_asset, env.rewards, env.daily_return ,actions_stacked, D_weights_stacked, S_weights_stacked
 
 

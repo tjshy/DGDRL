@@ -1,10 +1,13 @@
 from net import Actor, Critic
 import torch
-from typing import Tuple
 from copy import deepcopy
 import numpy as np
+import pandas as pd
 from tqdm import *
-class Agent:
+from config import Config
+
+cfg=Config()
+class AgentPPO:
     def __init__(self
                 , state_input_dim
                 , act_mid_layer_num
@@ -12,19 +15,18 @@ class Agent:
                 , cri_mid_layer_num
                 , cri_mid_dim
                 , action_dim
-                , gpu_id=1
+                ,gpu_id
                 ):
+
         self.if_off_policy = False
         self.act_class = Actor
         self.cri_class = Critic
-        self.gamma = 0.99
-        self.env_num = 1
-        self.batch_size = 128
-        self.repeat_times = 4
-        self.reward_scale = 1
-        self.learning_rate_cri = 0.08
-        self.learning_rate_act = 0.08
-        self.soft_update_tau = 2 ** -8
+        self.gamma = cfg.gamma
+        self.batch_size = cfg.batch_size
+        self.repeat_times = cfg.repeat_times
+        self.reward_scale = cfg.reward_scale
+        self.learning_rate_cri = cfg.learning_rate_cri
+        self.learning_rate_act = cfg.learning_rate_act
 
         self.if_off_policy = False
         self.if_act_target = False
@@ -57,10 +59,11 @@ class Agent:
         self.act_optimizer = torch.optim.Adam(self.act.parameters(), self.learning_rate_cri)
         self.cri_optimizer = torch.optim.Adam(self.cri.parameters(), self.learning_rate_act) \
             if self.cri_class else self.act_optimizer
-
+        
         self.criterion = torch.nn.SmoothL1Loss()
-        self.ratio_clip = 0.25
-        self.lambda_entropy = 0.02  # 0.00~0.10
+        self.ratio_clip = cfg.ratio_clip
+        self.lambda_entropy = cfg.lambda_entropy  # 0.00~0.10
+
 
     def explore_env(self, env, target_step, soft_noise) -> list:
         traj_list = []
@@ -79,9 +82,7 @@ class Agent:
                                                             ,soft_noise
                                                             )]
             next_s, reward, done, _ = env.step(ten_a[0].numpy())
-
             traj_list.append((ten_s, reward, done, ten_dr, ten_a, ten_n))
-
             step_i += 1
             if done:
                 break

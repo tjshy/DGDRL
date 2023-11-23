@@ -4,54 +4,42 @@ import numpy as np
 import pandas as pd
 import os
 from stock_env import StockTradingEnv
-from stock_env import get_gym_env_args
-from stock_env import build_env
-from agent import Agent
+from agent import AgentPPO
 from net import Actor
 from train import train_agent
 from train import evaluate_agent
 import matplotlib.pyplot as plt
+from config import Config,result_path
+
 
 def load_torch_file(model, _path):
     state_dict = torch.load(_path)
     model.load_state_dict(state_dict)
 
 class Arguments:
-    def __init__(self, agent, env_func=None, env_args=None):
-        self.env_func = env_func 
-        self.env_args = env_args 
+    def __init__(self, agent, cfg):
 
-        self.max_step = self.env_args['max_step']
-        self.env_name = self.env_args['env_name']
-        self.state_dim = self.env_args['state_dim']
-        self.action_dim = self.env_args['action_dim']
-
+        self.env_name = cfg.env_name
         self.agent = agent 
-        self.state_input_dim = 64 
-        self.action_dim = 30
-        self.act_mid_layer_num=2
-        self.act_mid_dim = 64
-        self.cri_mid_layer_num=2
-        self.cri_mid_dim = 64
-
-        self.if_off_policy = False
-
-        '''Arguments for device'''
-        self.worker_num = 4 
-        self.thread_num = 16
-        self.random_seed = 42
-        self.gpu_id = 1 
-
-        '''Arguments for evaluate'''
+        self.state_input_dim = cfg.state_input_dim
+        self.action_dim = cfg.action_dim
+        self.act_mid_layer_num=cfg.act_mid_layer_num
+        self.act_mid_dim = cfg.act_mid_dim
+        self.cri_mid_layer_num=cfg.cri_mid_layer_num
+        self.cri_mid_dim = cfg.cri_mid_dim
+        self.if_off_policy = self.get_if_off_policy()
+        self.thread_num = cfg.thread_num
+        self.epoch = cfg.epoch 
         self.cwd = None  
         self.rescwd = None
         self.if_remove = True  
-        self.epoch = 10
+        self.gpu_id=cfg.gpu_id
+
     def init_before_training(self):
 
         if self.cwd is None:
-            self.cwd = f'DGDRL/{self.env_name}_{self.agent.__name__[5:]}_{self.gpu_id}'
-            self.rescwd = 'DGDRL/result'
+            self.cwd = result_path+f'{self.env_name}_{self.agent.__name__[5:]}_{self.gpu_id}'
+            self.rescwd = result_path+'result'
 
         if self.if_remove is None:
             self.if_remove = bool(input(f"| Arguments PRESS 'y' to REMOVE: {self.cwd}? ") == 'y')
@@ -66,62 +54,54 @@ class Arguments:
         os.makedirs(self.cwd, exist_ok=True)
         os.makedirs(self.rescwd, exist_ok=True)
 
+    def get_if_off_policy(self):
+        name = self.agent.__name__
+        return all((name.find('PPO') == -1, name.find('A2C') == -1)) 
 
+def run(cfg):
+    env = StockTradingEnv(cfg,mode='train')
+    args = Arguments(AgentPPO,cfg)
+    args.target_step = env.max_step
+    # 训练
+    train_agent(args,env)
 
-def run():
-    gpu_id = 1
-    env = StockTradingEnv()
-    env_func = StockTradingEnv
-    env_args = get_gym_env_args(env=env, if_print=False)
-    env_args['beg_idx'] = 0         # training begin and end
-    env_args['end_idx'] = 3163    # DOWS:3272 SSE50:3163 NAS:3275
-    args = Arguments(Agent, env_func=env_func, env_args=env_args)
-    args.target_step = args.max_step
-    args.epoch = 200
-    args.gpu_id = gpu_id
-
-    # train
-    train_agent(args)
-
-
-def evaluate_models_in_directory(dir_path=None, gpu_id=-1):
+def evaluate_models_in_directory(dir_path=None, gpu_id=-1, cfg=None):
     print(f"| evaluate_models_in_directory: gpu_id {gpu_id}")
     print(f"| evaluate_models_in_directory: dir_path {dir_path}")
 
     model_names = [name for name in os.listdir(dir_path) if name[:6] == 'actor_']
     model_names.sort()
-    env_func = StockTradingEnv
-    env_args = {
-            'env_name': 'StockTradingEnv-v2',
-            'max_step': 3404,   # DOWS:3523 SSE50:3404    NAS:3524 
-            'beg_idx': 3143,    # DOWS:3272(-20) SSE50:3163(-20) NAS:3275(-20)   
-            'end_idx': 3404,    # DOWS:3523 SSE50:3404    NAS:3524     
-        }
+    env = StockTradingEnv(cfg,mode='test')
     device = torch.device(f"cuda:{gpu_id}" if (torch.cuda.is_available() and (gpu_id >= 0)) else "cpu")
-    env = build_env(env_func=env_func, env_args=env_args)
     actor = Actor(mid_dim=64
                         , mid_layer_num=2
                         , state_dim=64
                         , action_dim=30
                         ).to(device)
     torch.set_grad_enabled(False)
+    os.makedirs(dir_path,exist_ok=True)
+    os.makedirs(result_path+'act', exist_ok=True)
+    os.makedirs(result_path+"result", exist_ok=True)
     for model_name in model_names:
         
-        
         model_path = f"{dir_path}/{model_name}"
-        
         load_torch_file(actor, model_path)
-        cumulative_returns,everyday_assets,rewards,daily_return = evaluate_agent(env, actor)
+        cumulative_returns,everyday_assets,rewards,daily_return,daily_action,D_weights, S_weights= evaluate_agent(env, actor)
+
         everyday_assets = np.array(everyday_assets)
         rewards = np.array(rewards)
         daily_return = np.array(daily_return)
+        
+        np.save(result_path+'act/'+str(model_names.index(model_name))+"action.npy",daily_action)
+        np.save(result_path+'act/'+str(model_names.index(model_name))+"_D_weights.npy",D_weights)
+        np.save(result_path+'act/'+str(model_names.index(model_name))+"_S_weights.npy",S_weights)
+        
         final_res = pd.DataFrame({"everyday_assets":everyday_assets,"rewards":rewards,"daily_return":daily_return})
         print(final_res)
-        final_res.to_csv(dir_path+"/"+str(model_names.index(model_name))+"trade_res.csv")
+        final_res.to_csv(result_path+'act/'+str(model_names.index(model_name))+"trade_res.csv")
         print(f"cumulative_returns {cumulative_returns:9.3f}  {model_name}")
-        #plot("NAS-Reward",rewards)
+        plot("SSE-Reward",rewards)
     
-
 def plot(name, amount):
     plt.figure(figsize=(15, 6))
     plt.rcParams["font.size"] = 18
@@ -132,24 +112,25 @@ def plot(name, amount):
 
     plt.plot(range(len(amount)), amount, color="red", label="return", linewidth=3)
 
-    plt.title("Backtest")
+    plt.title("PPO Backtest")
     plt.xlabel("Date")
     plt.ylabel("return")
 
     plt.legend()
-    plt.savefig("DGDRL/result/" + name + "return.png")
+    plt.savefig(result_path+"result/" + name + "return.png")
     plt.close()
 
 
 if __name__ == '__main__':
     # set seed
-    random_seed=42
+    cfg=Config()
+    random_seed=cfg.random_seed
     np.random.seed(random_seed)
     torch.manual_seed(random_seed)
-    thread_num = 16
+    thread_num = cfg.thread_num
     torch.set_num_threads(thread_num)
     torch.set_default_dtype(torch.float32)
-    run()
-    gpu_id = 1
-    dir_path="DGDRL/StockTradingEnv-v2"
-    evaluate_models_in_directory(dir_path, gpu_id)
+    run(cfg)
+    gpu_id = cfg.gpu_id
+    dir_path=result_path+"StockTradingEnv-v2_PPO_1"
+    evaluate_models_in_directory(dir_path, gpu_id, cfg=cfg)

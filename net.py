@@ -3,7 +3,17 @@
 import torch
 import torch.nn as nn
 import numpy as np
-gpu_id=1
+from config import Config
+cfg = Config()
+gpu_id = cfg.gpu_id
+num_stocks = cfg.num_stocks
+input_dim = cfg.input_dim
+hidden_dim = cfg.hidden_dim
+output_dim = cfg.output_dim
+dropout = cfg.dropout
+num_heads = cfg.num_heads
+negative_slope = cfg.negative_slope
+window_len = cfg.window
 device = torch.device(f"cuda:{gpu_id}" if (torch.cuda.is_available() and (gpu_id >= 0)) else "cpu")
 SGRAPH_SSE = torch.as_tensor(np.load("DGDRL/data/SSE50/SGRAPH_SSE.npy"), dtype=torch.float32).to(device)
 SGRAPH_DOW = torch.as_tensor(np.load("DGDRL/data/DJI30/SGRAPH_DJI.npy"), dtype=torch.float32).to(device)
@@ -19,7 +29,7 @@ def build_fcn(mid_dim, mid_layer_num, inp_dim, out_dim):  # fcn (Fully Connected
 
 
 class DotProductAttention(nn.Module):
-    def __init__(self, dropout = 0.3):
+    def __init__(self, dropout = dropout):
         super(DotProductAttention, self).__init__()
         self.dropout = nn.Dropout(dropout)
     def forward(self, queries, keys, values):
@@ -33,10 +43,10 @@ class LSTM_HA(nn.Module):
     Here we employ the attention to LSTM to capture the time series traits more efficiently.
     '''
     def __init__(self, in_features,
-                 num_stocks = 30,
-                 window_len = 20,
-                 hidden_dim = 128,
-                 output_dim = 128,):
+            num_stocks = num_stocks,
+            window_len = window_len,
+            hidden_dim = hidden_dim,
+            output_dim = output_dim,):
         super(LSTM_HA, self).__init__()
         self.in_features = in_features
         self.num_stocks = num_stocks
@@ -55,7 +65,11 @@ class GAT_MultiHeads(nn.Module):
     '''
     Here we employ the multi-channel graph attention mechanism.
     '''
-    def __init__(self, in_features, out_features=128, negative_slope=0.2, num_heads=8, bias=True, residual=True):
+    def __init__(self, in_features, 
+            out_features=output_dim, 
+            negative_slope=negative_slope, 
+            num_heads=num_heads, 
+            bias=True, residual=True):
         super(GAT_MultiHeads, self).__init__()
         self.num_heads = num_heads
         self.out_features = int(out_features / self.num_heads)
@@ -114,7 +128,12 @@ class FeatureHead(nn.Module):
     '''
     Here is the whole perception layer
     '''
-    def __init__(self, input_dim=14, output_dim = 128, num_stocks=30, window=20, hidden_dim = 128):
+    def __init__(self, 
+            input_dim=input_dim, 
+            output_dim = output_dim, 
+            num_stocks=num_stocks, 
+            window=window_len, 
+            hidden_dim = hidden_dim):
         super().__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
@@ -132,9 +151,6 @@ class FeatureHead(nn.Module):
                         )
         self.gat.reset_parameters()
         
-        
-        
-
     def forward(self, x, x_dg=None):
         scores = self.lstm(x)
         scores = self.gat(scores, Dgraph=x_dg)
