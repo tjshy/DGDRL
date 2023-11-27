@@ -73,10 +73,10 @@ def evaluate_models_in_directory(dir_path=None, gpu_id=-1, cfg=None):
     model_names.sort()
     env = StockTradingEnv(cfg,mode='test')
     device = torch.device(f"cuda:{gpu_id}" if (torch.cuda.is_available() and (gpu_id >= 0)) else "cpu")
-    actor = Actor(mid_dim=64
-                        , mid_layer_num=2
-                        , state_dim=64
-                        , action_dim=30
+    actor = Actor(mid_dim=cfg.act_mid_dim
+                        , mid_layer_num=cfg.act_mid_layer_num
+                        , state_dim=cfg.state_input_dim
+                        , action_dim=cfg.action_dim
                         ).to(device)
     torch.set_grad_enabled(False)
     os.makedirs(dir_path,exist_ok=True)
