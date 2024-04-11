@@ -12,6 +12,7 @@ batch_size: 1024
 lamb: 1.0
 rho: 0.99
 ```
+
 ###TRA
 ```
 hidden_size: 64
@@ -71,6 +72,7 @@ loss_fcn = mse_loss
 epochs_save_by = 60 
 ```
 The parameters of THGNN are mainly referred to https://github.com/finint/THGNN.
+
 ###FactorVAE
 ```
 batch_size = 32
@@ -83,6 +85,7 @@ lr = 1e-5
 epochs = 100
 ```
 The parameters of FactorVAE are mainly referred to https://github.com/ytliu74/FactorVAE.
+
 ###CTTS
 ```
 hidden_size: 64
