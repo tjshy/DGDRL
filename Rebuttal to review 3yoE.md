@@ -24,9 +24,9 @@ $$
 \sum_{i=1}^{N} w_{i}(t)=1, \quad w_{i}(t) \in [0,1], \quad t=1, \cdots, T.
 $$
 
-w^{*}(t) represents the optimal portfolio weight vector, w(t) represents the portfolio weight, y(t) represents the  stock yield, and \tau represents the transaction cost.
+w(t) represents the portfolio weight, y(t) represents the return of the stock at time t, and \tau represents the transaction cost.
 
-We will add the above problem formulation in the ** revised version**. 
+We will add the above problem formulation in the **revised version**. 
 
 	Q2: The idea behind the design of DGDRL
 A2:  Our motivation is to better capture **long- and short-term relations** to **directly optimize** the portfolio's performance. 
