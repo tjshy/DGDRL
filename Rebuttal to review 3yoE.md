@@ -6,7 +6,7 @@ Thank you for your inquiries regarding the details in our paper. Your questions 
 A1: Considering a portfolio with N assets over T time slots, the portfolio management task aims to maximize profit and minimize risk. The formal equtation is 
 
 
-The optimal weights \( w^*(t) \) are defined as follows:
+The optimal weights $w^*(t)$ are defined as follows:
 
 $$
 w^{*}(t) = \arg \max _{w(t)}(1-\tau) w^{\top}(t) y(t)
