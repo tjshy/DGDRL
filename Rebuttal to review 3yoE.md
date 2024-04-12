@@ -44,7 +44,7 @@ A3&A4: The state refers to the condition of the stock market, specifically the h
 
 A5&A6: 1) The neighboring nodes refer to other stocks that have relations with the current stock. 2) The stocks are arranged in default order according to their names. For this part, the order is not significant. Figure 5 investigates whether there exists a consistency relationship between the relationships among stocks and the formulation of strategies, namely, whether the relationships among stocks can contribute to investment strategies.
 
-	D5: The meaning of neighboring
+	D5: The setting of distance threshold
 A7:The threshold is determined artificially based on the degree of correlation among stocks. We artificially configured it. Its purpose is to avoid the formation of a fully connected graph where all stocks are correlated.	
 
 	D6: The statistics of the datasets
