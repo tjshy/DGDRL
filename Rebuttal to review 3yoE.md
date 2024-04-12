@@ -6,11 +6,25 @@ Thank you for your inquiries regarding the details in our paper. Your questions 
 A1: Considering a portfolio with N assets over T time slots, the portfolio management task aims to maximize profit and minimize risk. The formal equtation is 
 
 
-$$ 
-\begin{aligned} w^{*}(t) & =\arg \max _{w(t)}(1-\tau) w^{\top}(t) y(t) \\ & =\arg \max _{w(t)} w^{\top}(t) y(t), \\ & \text { s.t. } \sum_{i=1}^{N} w_{i}(t)=1, w_{i}(t) \in[0,1], t=1, \cdots, T . \end{aligned}
- $$
+The optimal weights \( w^*(t) \) are defined as follows:
 
-w^{*}(t) represents the portfolio weight vector, w(t) represents the portfolio weight, y(t) represents the yield, and \tau represents the transaction cost.
+$$
+w^{*}(t) = \arg \max _{w(t)}(1-\tau) w^{\top}(t) y(t)
+$$
+
+This can be simplified under the assumption that \( 1-\tau \) is a constant multiplier:
+
+$$
+w^{*}(t) = \arg \max _{w(t)} w^{\top}(t) y(t),
+$$
+
+subject to the constraints:
+
+$$
+\sum_{i=1}^{N} w_{i}(t)=1, \quad w_{i}(t) \in [0,1], \quad t=1, \cdots, T.
+$$
+
+w^{*}(t) represents the optimal portfolio weight vector, w(t) represents the portfolio weight, y(t) represents the  stock yield, and \tau represents the transaction cost.
 
 We will add the above problem formulation in the ** revised version**. 
 
@@ -26,7 +40,8 @@ We aim to obtain representations of temporal features, which is the idea behind 
 
 A3&A4: The state refers to the condition of the stock market, specifically the historical characteristics of stocks observable by investors. The r_t represents the stock returns on the day following the execution of an action, independent of evaluative metrics such as ARR, AVol, etc. We will augment our explanations regarding this aspect in the **revised version**.
 
-	Q5&Q6: The order of stocks in Figure 5(a)
+	Q5&Q6: The meaning of neighboring and the order of stocks in Figure 5(a)
+
 A5&A6: 1) The neighboring nodes refer to other stocks that have relations with the current stock. 2) The stocks are arranged in default order according to their names. For this part, the order is not significant. Figure 5 investigates whether there exists a consistency relationship between the relationships among stocks and the formulation of strategies, namely, whether the relationships among stocks can contribute to investment strategies.
 
 	D5: The meaning of neighboring
@@ -37,4 +52,4 @@ A8: Our SSE50 dataset comprises 50 stocks, DOWS30 consists of 30 stocks, and NAS
 
 	D7: Not all baselines appear in Figure 3
 
-A9: Thanks. In figure 3, we did not record the profit curves of some models with the lowest performance for the ease of viewing. We can add them in the next version of our paper. 
+A9: Thanks. In figure 3, we did not record the profit curves of some models with the lowest performance for the ease of viewing. We can add them in the **next version** of our paper. 
