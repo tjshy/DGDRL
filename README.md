@@ -74,8 +74,7 @@ The metrics used in our experiments are as follows:
 
 2) AVol is used to measure the annualized average risk of a strategy. The computational formula is AVol = $\mathop{std}({R}_T) \times \sqrt{{N}_y}$, where ${R}_T = \{{r}_T^1, {r}_T^2, \ldots,{r}_T^t \}$. ${r}_T^t$ represents the rate of return at $t$.
 
-3) MDD is used to describe the worst possible scenario after buying a product. The formula is MDD = $  - \mathop{max}\limits_{\tau \in [1,T]} \ (  \mathop{max}\limits_{t \in [1,\tau]}  \ (\frac{{r}_t - {r}_\tau} {{r}_t}) )$, where $\tau$ and $t$ represent two moments within period $T$, and ${r}_t$ and ${r}_\tau$ are the cumulative returns at these two moments, respectively.
--max _{\tau \in[1, T]}\left(max _{t \in[1, \tau]}\left(\frac{r_{t}-r_{\tau}}{r_{t}}\right)\right)
+3) MDD is used to describe the worst possible scenario after buying a product. The formula is MDD = $-max _{\tau \in[1, T]}\left(max _{t \in[1, \tau]}\left(\frac{r_{t}-r_{\tau}}{r_{t}}\right)\right)$, where $\tau$ and $t$ represent two moments within period $T$, and ${r}_t$ and ${r}_\tau$ are the cumulative returns at these two moments, respectively. 
 
 4) ASR is based on volatility to describe the extra return for taking risk. The computational formula is ASR = ARR $/$ AVol.
 
