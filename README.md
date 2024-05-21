@@ -1,7 +1,5 @@
 # Dynamic Graph-based Deep Reinforcement Learning with Long and Short-term Relation Modeling for Portfolio Optimization (DGDRL)
 
-<<<<<<< Updated upstream
-
 ## Abstract
 In this paper, we proposed a practical solution for portfolio optimization with long- and short-term relation augmentation.  We achieve this goal by **devising two mechanisms for naturally modeling the financial market**: 
 
@@ -206,7 +204,7 @@ we examined the consistency of the portfolio with stock relationships (including
 ### 3. Parameter Sensitivity
 <br/>
 <div align="center">
-	<img src="/fig/Sensitivity.png" width="80%">
+	<img src="/fig/sensitivity.png" width="80%">
 
 </div>
 
