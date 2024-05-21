@@ -70,18 +70,18 @@ We put baseline's parameter Settings in [baseline_setting.md](#baseline_setting.
 
 The metrics used in our experiments are as follows:
 
-1) ARR is an annualized average of return rate. The computational formula is ARR = ${r}_T$ \^{} $\frac{{N}_y}{{N}_T}$, where  ${r}_T$ represents the cumulative returns within the period $T$, ${N}_y$ represents the number of trading days in a year, and ${N}_T$ represents the number of trading days in $T$.
+1) ARR is an annualized average of return rate. The computational formula is ARR = ${r}_T \^{} \frac{{N}_y}{{N}_T}$, where  ${r}_T$ represents the cumulative returns within the period $T$, ${N}_y$ represents the number of trading days in a year, and ${N}_T$ represents the number of trading days in $T$.
 
-2) AVol is used to measure the annualized average risk of a strategy. The computational formula is AVol = $\std({R}_T) \times \sqrt{{N}_y}$, where ${R}_T = \{{r}_T^1, {r}_T^2, \ldots,{r}_T^t \}$. ${r}_T^t$ represents the rate of return at $t$.
+2) AVol is used to measure the annualized average risk of a strategy. The computational formula is AVol = $std({R}_T) \times \sqrt{{N}_y}$, where ${R}_T = \{{r}_T^1, {r}_T^2, \ldots,{r}_T^t \}$. ${r}_T^t$ represents the rate of return at $t$.
 
 3) MDD is used to describe the worst possible scenario after buying a product. The formula is
-MDD = $ -\max \limits_{\tau \in [1,T]} \ ( \max \limits_{t \in [1,\tau]} \ (\frac{{r}_t - {r}_\tau} {{r}_t}) )$, where $\tau$ and $t$ represent two moments within period $T$, and ${r}_t$ and ${r}_\tau$ are the cumulative returns at these two moments, respectively.
+MDD = $ -max \limits_{\tau \in [1,T]} \ ( max \limits_{t \in [1,\tau]} \ (\frac{{r}_t - {r}_\tau} {{r}_t}) )$, where $\tau$ and $t$ represent two moments within period $T$, and ${r}_t$ and ${r}_\tau$ are the cumulative returns at these two moments, respectively.
 
 4) ASR is based on volatility to describe the extra return for taking risk. The computational formula is ASR = ARR $/$ AVol.
 
-5) CR describes the extra return on risk based on maximum drawdown. The computational formula is CR = ARR $/$ \abs (MDD).
+5) CR describes the extra return on risk based on maximum drawdown. The computational formula is CR = ARR $/$ abs (MDD).
 
-6) IR measure the excess return of an investment compared to a benchmark. The computational formula is IR = ${R}_T$ \times $\sqrt{{N}_y} / \std({R}_T) $.
+6) IR measure the excess return of an investment compared to a benchmark. The computational formula is IR = ${R}_T \times \sqrt{{N}_y} / std({R}_T) $.
 
 ARR, Avol, and MDD serve as the three foundational metrics, with ARR being the most crucial as achieving high returns is the ultimate investment objective for investors. ASR, CR, and IR, on the other hand, represent the three advanced metrics, which integrate both the model's investment returns and the associated risks. ARR, ASR, CR, and IR exhibit superior performance as their values increase, signifying better outcomes. Conversely, for AVol and abs(MDD), lower values reflect improved performance.
 
