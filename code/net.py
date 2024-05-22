@@ -20,8 +20,8 @@ device = torch.device(f"cuda:{gpu_id}" if (torch.cuda.is_available() and (gpu_id
 
 if dataset=='SSE':
     SGRAPH= torch.as_tensor(np.load("/home/SSE/sse_relation.npy"), dtype=torch.float32).to(device)
-elif dataset=='DJI':
-    SGRAPH= torch.as_tensor(pd.read_pickle("/home/DJI/dji_relation.pickle"), dtype=torch.float32).to(device)
+elif dataset=='DOW':
+    SGRAPH= torch.as_tensor(pd.read_pickle("/home/DOW/dow_relation.pickle"), dtype=torch.float32).to(device)
 elif dataset=='NDX':
     SGRAPH= torch.as_tensor(pd.read_pickle("/home/NDX/ndx_relation.pickle"), dtype=torch.float32).to(device)
 
