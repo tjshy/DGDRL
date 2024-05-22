@@ -26,7 +26,7 @@ Our code is run in GPU by default (CUDA 11.1+ here) , you can change the device 
 ## Repository Structre
 
 The 'code' directory contains the source code of our methodology, executable via the "main.sh". 
-The 'data' directory contains a subset of the testing dataset and pre-trained models utilized for code execution verification. Among these, the csv files contain historical feature data, 'd_relation.pkl' stores the graphs for short-term relations, and the pickle files store the graph for long-term relations. It is important to note that training is conducted on a daily basis, with the division between training and testing set on a daily basis as well.
+The 'data' directory contains a subset of the testing dataset utilized for code execution verification. Among these, the csv files contain historical feature data, 'd_relation.pkl' stores the graphs for short-term relations, and the pickle files store the graph for long-term relations. It is important to note that training is conducted on a daily basis, with the division between training and testing set on a daily basis as well.
 The "result" directory contains profit curves resulting from model testing.
 
 ## Experiment Details
@@ -105,7 +105,7 @@ Figures above respectively depict the return curves during the testing period on
 ### 2. Portfolio Consistency 
 <br/>
 <div align="center">
-	<img src="/fig/consistency.png" width="80%">
+	<img src="/fig/consistency.png" width="60%">
 
 </div>
 
@@ -114,7 +114,7 @@ we examined the consistency of the portfolio with stock relationships (including
 ### 3. Parameter Sensitivity
 <br/>
 <div align="center">
-	<img src="/fig/sensitivity.png" width="80%">
+	<img src="/fig/sensitivity.png" width="60%">
 
 </div>
 
